@@ -31,7 +31,6 @@ class StackFrontier():
 
 
 class QueueFrontier(StackFrontier):
-
     def remove(self):
         if self.empty():
             raise Exception("empty frontier")
@@ -42,10 +41,11 @@ class QueueFrontier(StackFrontier):
 
 
 class Maze():
-
     def __init__(self, filename):
 
         # Read file and set height and width of maze
+        self.explored = None
+        self.num_explored = None
         with open(filename) as f:
             contents = f.read()
 
@@ -123,7 +123,7 @@ class Maze():
 
         # Initialize frontier to just the starting position
         start = Node(state=self.start, parent=None, action=None)
-        frontier = StackFrontier()
+        frontier = StackFrontier()  # StackFrontier QueueFrontier
         frontier.add(start)
 
         # Initialize an empty explored set
