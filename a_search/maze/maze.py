@@ -1,19 +1,17 @@
 import sys
+from abc import ABC, abstractmethod
 
 
-class Node():
+class Node:
     def __init__(self, state, parent, action):
         self.state = state
         self.parent = parent
         self.action = action
 
 
-class StackFrontier():
+class Frontier(ABC):
     def __init__(self):
         self.frontier = []
-
-    def add(self, node):
-        self.frontier.append(node)
 
     def contains_state(self, state):
         return any(node.state == state for node in self.frontier)
@@ -21,6 +19,15 @@ class StackFrontier():
     def empty(self):
         return len(self.frontier) == 0
 
+    def add(self, node):
+        self.frontier.append(node)
+
+    @abstractmethod
+    def remove(self):
+        pass
+
+
+class StackFrontier(Frontier):
     def remove(self):
         if self.empty():
             raise Exception("empty frontier")
@@ -30,7 +37,7 @@ class StackFrontier():
             return node
 
 
-class QueueFrontier(StackFrontier):
+class QueueFrontier(Frontier):
     def remove(self):
         if self.empty():
             raise Exception("empty frontier")
@@ -40,7 +47,7 @@ class QueueFrontier(StackFrontier):
             return node
 
 
-class Maze():
+class Maze:
     def __init__(self, filename):
 
         # Read file and set height and width of maze
@@ -213,15 +220,16 @@ class Maze():
         img.save(filename)
 
 
-if len(sys.argv) != 2:
-    sys.exit("Usage: python maze.py maze.txt")
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        sys.exit("Usage: python maze.py maze.txt")
 
-m = Maze(sys.argv[1])
-print("Maze:")
-m.print()
-print("Solving...")
-m.solve()
-print("States Explored:", m.num_explored)
-print("Solution:")
-m.print()
-m.output_image("maze.png", show_explored=True)
+    m = Maze(sys.argv[1])
+    print("Maze:")
+    m.print()
+    print("Solving...")
+    m.solve()
+    print("States Explored:", m.num_explored)
+    print("Solution:")
+    m.print()
+    m.output_image("maze.png", show_explored=True)
