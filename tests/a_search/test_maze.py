@@ -1,28 +1,50 @@
 import pytest
 from a_search.maze.maze import Maze
+import io
 
 
 class TestMaze:
-
-    @pytest.fixture(scope='class')
+    @pytest.fixture
     def maze(self):
         return Maze("./test_files/maze1.txt")
 
     def test_init(self, maze):
-        assert maze.height == 10, "Height should be 10 for simple_maze.txt"
-        assert maze.width == 10, "Width should be 10 for simple_maze.txt"
-        assert maze.start == (9, 0), "Start should be at (1, 1) for simple_maze.txt"
-        assert maze.goal == (0, 5), "Goal should be at (8, 8) for simple_maze.txt"
+        assert maze.height == 10
+        assert maze.width == 10
+        assert maze.start == (9, 0)
+        assert maze.goal == (0, 5)
 
     def test_solve(self, maze):
         maze.solve()
         solution_actions, solution_cells = maze.solution
-        assert solution_actions[0] == "up", "Solution should start with 'down' action"
-        assert solution_cells[0] == (8, 0), "Solution should start with cell (2, 1)"
-        assert solution_actions[-1] == "up", "Solution should end with 'right' action"
-        assert solution_cells[-1] == (0, 5), "Solution should end with goal cell (8, 8)"
+        assert solution_actions[0] == "up"
+        assert solution_cells[0] == (8, 0)
+        assert solution_actions[-1] == "up"
+        assert solution_cells[-1] == (0, 5)
 
     def test_neighbors(self, maze):
         neighbors = maze.neighbors((9, 0))
         expected_neighbors = [('up', (8, 0))]
-        assert neighbors == expected_neighbors, "Neighbors of cell (1,1) should be " + str(expected_neighbors)
+        assert neighbors == expected_neighbors
+
+    def test_maze_init_multiple_starts(self, monkeypatch):
+        monkeypatch.setattr('builtins.open', lambda x, y='r': io.StringIO("AA B"))
+        with pytest.raises(Exception):
+            Maze("./test_files/maze1.txt")
+
+    def test_maze_init_multiple_goals(self, monkeypatch):
+        monkeypatch.setattr('builtins.open', lambda x, y='r': io.StringIO("A BB"))
+        with pytest.raises(Exception):
+            Maze("./test_files/maze1.txt")
+
+    def test_maze_solve_exists(self, monkeypatch):
+        monkeypatch.setattr('builtins.open', lambda x, y='r': io.StringIO("A  B"))
+        maze = Maze("./test_files/maze1.txt")
+        maze.solve()
+        assert maze.solution is not None
+
+    def test_maze_neighbors_exists(self, monkeypatch):
+        monkeypatch.setattr('builtins.open', lambda x, y='r': io.StringIO("A  B"))
+        maze = Maze("./test_files/maze1.txt")
+        neighbors = maze.neighbors(maze.start)
+        assert isinstance(neighbors, list)
